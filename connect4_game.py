@@ -20,6 +20,7 @@ class Connect4:
             raise ValueError("Column is full")
         top_most = column_zeros[0][-1]
         board[top_most, col] = player
+        self.board = board
         return board
 
     def draw_grid(self, color: str = "white"):
