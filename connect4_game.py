@@ -81,7 +81,3 @@ class Connect4:
             self.render()
             player = -player
 
-
-if __name__ == "__main__":
-    game = Connect4(cols=6)
-    game.play_random()
