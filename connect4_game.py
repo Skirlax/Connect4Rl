@@ -34,6 +34,8 @@ class Connect4:
                     pg.draw.circle(self.screen, color2, (j * 100 + 50, i * 100 + 50), 40)
 
     def render(self):
+        if self.screen is None:
+            return
         self.screen.fill((0, 0, 0))
         self.draw_grid()
         self.draw_board()
