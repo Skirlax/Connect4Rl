@@ -12,33 +12,39 @@ class Connect4:
         self.num_to_win = num_to_win
         self.board = np.zeros((self.rows, self.cols))
 
-    def play(self, col: int, player: int):
-        column_zeros = np.where(self.board[:, col] == 0)
+    def play(self, col: int, player: int, board: np.ndarray = None):
+        if board is None:
+            board = self.board
+        column_zeros = np.where(board[:, col] == 0)
         if len(column_zeros[0]) == 0:
             raise ValueError("Column is full")
         top_most = column_zeros[0][-1]
-        self.board[top_most, col] = player
-        return self.board.copy()
+        board[top_most, col] = player
+        return board
 
     def draw_grid(self, color: str = "white"):
         for i in range(self.rows):
             for j in range(self.cols):
                 pg.draw.rect(self.screen, color, (j * 100, i * 100, 100, 100), 2)
 
-    def draw_board(self, color1: str = "blue", color2: str = "red"):
+    def draw_board(self, color1: str = "blue", color2: str = "red", board: np.ndarray = None):
+        if board is None:
+            board = self.board
         for i in range(self.rows):
             for j in range(self.cols):
-                if self.board[i, j] == 1:
+                if board[i, j] == 1:
                     pg.draw.circle(self.screen, color1, (j * 100 + 50, i * 100 + 50), 40)
-                elif self.board[i, j] == -1:
+                elif board[i, j] == -1:
                     pg.draw.circle(self.screen, color2, (j * 100 + 50, i * 100 + 50), 40)
 
-    def render(self):
+    def render(self, board: np.ndarray = None):
         if self.screen is None:
             return
+        if board is None:
+            board = self.board
         self.screen.fill((0, 0, 0))
         self.draw_grid()
-        self.draw_board()
+        self.draw_board(board=board)
         pg.display.update()
 
     def check_win(self, player: int, board: np.ndarray):
@@ -83,3 +89,21 @@ class Connect4:
             self.render()
             player = -player
 
+    def game_result(self, player: int, board: np.ndarray = None):
+        if board is None:
+            board = self.board
+        if self.check_win(player, board):
+            return 1.0
+        elif self.check_win(-player, board):
+            return -1.0
+        elif np.all(board != 0):
+            return 1e-4
+        return None
+
+    def step(self, action: int, player: int, board: np.ndarray = None):
+        if board is None:
+            board = self.board
+        reward = 0  # implement your own reward handling if you need rewards.
+        board = self.play(action, player, board)
+        done = self.check_win(player, board)
+        return board, reward, done
