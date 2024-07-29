@@ -1,3 +1,4 @@
+import sys
 import time
 
 import pygame as pg
@@ -14,13 +15,14 @@ class Connect4:
 
     def play(self, col: int, player: int, board: np.ndarray = None):
         if board is None:
-            board = self.board
+            board = self.board.copy()
         column_zeros = np.where(board[:, col] == 0)
         if len(column_zeros[0]) == 0:
+            print(board)
             raise ValueError("Column is full")
         top_most = column_zeros[0][-1]
         board[top_most, col] = player
-        self.board = board
+        self.board = board.copy()
         return board
 
     def draw_grid(self, color: str = "white"):
@@ -30,7 +32,7 @@ class Connect4:
 
     def draw_board(self, color1: str = "blue", color2: str = "red", board: np.ndarray = None):
         if board is None:
-            board = self.board
+            board = self.board.copy()
         for i in range(self.rows):
             for j in range(self.cols):
                 if board[i, j] == 1:
@@ -42,7 +44,7 @@ class Connect4:
         if self.screen is None:
             return
         if board is None:
-            board = self.board
+            board = self.board.copy()
         self.screen.fill((0, 0, 0))
         self.draw_grid()
         self.draw_board(board=board)
@@ -59,10 +61,10 @@ class Connect4:
         w = np.ones((self.num_to_win, self.num_to_win))
         # + 1 because the start position of the filter also counts.
         strides = ((self.rows - self.num_to_win) + 1) * ((self.cols - self.num_to_win) + 1)
+        player_board = (board == player).astype(int)
         for i in range(strides):
             row = i // ((self.cols - self.num_to_win) + 1)
             col = i % ((self.cols - self.num_to_win) + 1)
-            player_board = (board == player).astype(int)
             res = player_board[row:row + self.num_to_win, col:col + self.num_to_win] * w
             if np.any(np.sum(res, axis=0) == self.num_to_win):
                 return True
@@ -92,7 +94,7 @@ class Connect4:
 
     def game_result(self, player: int, board: np.ndarray = None):
         if board is None:
-            board = self.board
+            board = self.board.copy()
         if self.check_win(player, board):
             return 1.0
         elif self.check_win(-player, board):
@@ -103,8 +105,25 @@ class Connect4:
 
     def step(self, action: int, player: int, board: np.ndarray = None):
         if board is None:
-            board = self.board
-        reward = 0  # implement your own reward handling if you need rewards.
+            board = self.board.copy()
         board = self.play(action, player, board)
-        done = self.check_win(player, board)
+        result = self.game_result(player, board)
+        done = result is not None
+        reward = result if done else 0
         return board, reward, done
+
+    def get_human_input(self, board: np.ndarray):
+        while True:
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    pg.display.quit()
+                    pg.quit()
+                    sys.exit(0)
+
+            if pg.mouse.get_pressed()[0]:
+                x, y = (x // 100 for x in pg.mouse.get_pos())
+                if board[y][x][0] == 0:
+                    # time.sleep(1)
+                    return y, x
+
+
