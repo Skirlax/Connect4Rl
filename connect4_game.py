@@ -52,9 +52,11 @@ class Connect4:
 
     def check_win(self, player: int, board: np.ndarray):
         """
-        Check if player has won the game. This method essentially performs a 2d convolution (without the summing) and
-        on each stride, checks if the player has won. This makes the method player invariant and board size invariant
-        as well as efficient. :param player: :param board: :return:
+        Check if player has won the game. This method essentially performs a 2d convolution (without the summing) and on each stride, check if the player has won.
+        This makes the method player invariant and board size invariant as well as efficient.
+        :param player:
+        :param board:
+        :return:
         """
         w = np.ones((self.num_to_win, self.num_to_win))
         # + 1 because the start position of the filter also counts.
@@ -107,7 +109,7 @@ class Connect4:
         board = self.play(action, player, board)
         result = self.game_result(player, board)
         done = result is not None
-        reward = 1 if done else 0
+        reward = result if done else 0
         return board, reward, done
 
     def get_human_input(self, board: np.ndarray):
